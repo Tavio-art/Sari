@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function ownedByCaller() {
+      return signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function incomingOwnedByCaller() {
+      return signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Existing doc is caller's, or legacy (no userId yet).
+    function existingWritable() {
+      return signedIn()
+        && (
+          !('userId' in resource.data)
+          || resource.data.userId == request.auth.uid
+        );
+    }
+
+    // After write, userId is caller's or still absent (stock-only merges).
+    function incomingAcceptable() {
+      return signedIn()
+        && (
+          !('userId' in request.resource.data)
+          || request.resource.data.userId == request.auth.uid
+        );
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSelf(userId);
+    }
+
+    match /orders/{orderId} {
+      allow read, delete: if ownedByCaller();
+      allow create: if incomingOwnedByCaller();
+      allow update: if ownedByCaller() && incomingOwnedByCaller();
+    }
+
+    match /credits/{creditId} {
+      allow read, delete: if ownedByCaller();
+      allow create: if incomingOwnedByCaller();
+      allow update: if ownedByCaller()
+        && request.resource.data.userId == resource.data.userId;
+    }
+
+    // Barcode doc ids are shared; list/filter by userId in the client.
+    match /products/{productId} {
+      allow read: if signedIn();
+      allow create: if incomingOwnedByCaller();
+      allow update: if existingWritable() && incomingAcceptable();
+      allow delete: if ownedByCaller();
+    }
+
+    match /inventory/{itemId} {
+      allow read: if signedIn();
+      allow create: if incomingOwnedByCaller();
+      allow update: if existingWritable() && incomingAcceptable();
+      allow delete: if ownedByCaller();
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "240909232949",
+    "firebase_url": "https://sari-89290-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sari-89290",
+    "storage_bucket": "sari-89290.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240909232949:android:d11a9ea0fe706dee387a7c",
+        "android_client_info": {
+          "package_name": "com.example.sari_sari"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwy44vQAqCV1OojDtpvsxW-lXVGycYiEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
